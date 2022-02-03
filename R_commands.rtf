@@ -1,0 +1,533 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2580
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 TimesNewRomanPS-BoldMT;\f1\froman\fcharset0 TimesNewRomanPSMT;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww15860\viewh14820\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\qc\partightenfactor0
+
+\f0\b\fs24 \cf0 R scripts for bacterial and archaea and fungal data analysis\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \
+\
+#For bacterial and archaeal data
+\f1\b0 \
+\pard\pardeftab720\ri0\partightenfactor0
+\cf0 getwd()\
+setwd("/Volumes/GoogleDrive/Shared drives/Crop soil microbiome/microbial-data")\
+library(vegan) \
+library(devtools)\
+library(phyloseq) \
+library(ape) \
+library(dplyr)\
+library(ggplot2)\
+library(tidyr) \
+library(permute)\
+library(lattice)\
+library(adonis2)\
+install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis")\
+library(pairwiseAdonis)\
+library(cluster)\
+\
+#import the OTU table\
+Bac_OTU_table<-read.csv("/Volumes/GoogleDrive/Shared drives/Crop soil microbiome/microbial-data/demux_16S/diversity/lettuce_kaichoy_corn/qiimetoR/16S-feature-table-LKM.csv", sep=',', row.names=1)\
+Bac_OTU_table<-as.matrix(Bac_OTU_table)\
+\
+#import taxonomic table\
+Bac_tax<-read.csv("/Volumes/GoogleDrive/Shared drives/Crop soil microbiome/microbial-data/demux_16S/diversity/lettuce_kaichoy_corn/qiimetoR/16S-taxonomy.csv", sep=',', row.names=1)\
+Bac_tax<- as.matrix(Bac_tax)\
+head(Bac_tax)\
+\
+#import metadata\
+Pro_metadata<-read.csv("/Volumes/GoogleDrive/Shared drives/Crop soil microbiome/microbial-data/demux_16S/diversity/lettuce_kaichoy_corn/qiimetoR/metadata-16S-LKM.csv", row.names=1, header=TRUE, sep = ',')\
+\
+#import phylogenetic tree\
+Pro_phy_tree<-read_tree("/Volumes/GoogleDrive/Shared drives/Crop soil microbiome/microbial-data/demux_16S/diversity/lettuce_kaichoy_corn/qiimetoR/16S-tree.nwk")\
+Pro_metadata$SoilSample=factor(Pro_metadata$SoilSamplingStage, c("Fallow","Cultivated"))\
+Pro_metadata$SoilSample=factor(Pro_metadata$SoilSample, levels=c("Fallow","Cultivated"))\
+Pro_metadata \
+\
+## import all as phyloseq object###\
+Pro_OTU<-otu_table(Bac_OTU_table, taxa_are_rows=TRUE)\
+Pro_tax<-tax_table(Bac_tax)\
+Pro_Meta<-sample_data(Pro_metadata)\
+\
+##Checking for consistent OTU names\
+taxa_names(Pro_tax)\
+taxa_names(Pro_OTU)\
+taxa_names(Pro_phy_tree)\
+\
+\
+###Finally merge four data##\
+Pro_merged_OTMT<-phyloseq(Pro_OTU,Pro_tax,Pro_Meta, Pro_phy_tree)\
+\
+#Research question: Access the effect of plant species on microbial community structure and function: \
+#3 components: Soil Sample (Fallow, Cultivated), plant species (lettuce, kaichoy, maize), Plant cycle(1,2,3)\
+ \
+\
+######ALPHA DIVERSITY###################\
+######ALPHA DIVERSITY###################\
+######ALPHA DIVERSITY###################\
+#Normality test#\
+#does not pass normality test\
+shapiro.test(Pro_metadata$shannon)\
+ggdensity(Pro_metadata$shannon, xlab="shannon diversity")\
+outliers16S_shannon<-boxplot(Pro_metadata$shannon, plot=TRUE)$out #find outliers\
+Pro_metadata_or<-Pro_metadata[-which(Pro_metadata$shannon %in% outliers16S_shannon),] #outlier removed\
+shapiro.test(Pro_metadata_or$shannon) #after removing outliers passes normality test\
+\
+shapiro.test(Pro_metadata$observed_otus)\
+ggdensity(Pro_metadata$observed_otus, xlab="observed_otus")\
+ggqqplot(Pro_metadata$observed_otus)\
+outliers16S_observed_otus<-boxplot(Pro_metadata$observed_otus, plot=TRUE)$out\
+Pro_metadata_or<-Pro_metadata[-which(Pro_metadata$observed_otus %in% outliers16S_observed_otus),]\
+shapiro.test(Pro_metadata_or$observed_otus) #after removing outliers passes normality test\
+\
+shapiro.test(Pro_metadata$faith_pd)\
+ggdensity(Pro_metadata$faith_pd, xlab="faith_pd")\
+ggqqplot(Pro_metadata$faith_pd)\
+outliers16S_ofaith_pd<-boxplot(Pro_metadata$faith_pd, plot=TRUE)$out\
+Pro_metadata_or<-Pro_metadata[-which(Pro_metadata$faith_pd %in% outliers16S_ofaith_pd),]\
+shapiro.test(Pro_metadata_or$faith_pd) #after removing outliers passes normality test\
+\
+#check the homogenity of variances, all of them pass homogenity of variances.\
+bartlett.test(shannon~SoilSamplingStage, data=Pro_metadata_or)\
+bartlett.test(faith_pd~SoilSamplingStage, data=Pro_metadata_or)\
+bartlett.test(observed_otus~SoilSamplingStage, data=Pro_metadata_or)\
+\
+bartlett.test(shannon~Crop, data=Pro_metadata_or)\
+bartlett.test(faith_pd~Crop, data=Pro_metadata_or)\
+bartlett.test(observed_otus~Crop, data=Pro_metadata_or)\
+\
+bartlett.test(shannon~CropCycle, data=Pro_metadata_or)\
+bartlett.test(faith_pd~CropCycle, data=Pro_metadata_or)\
+bartlett.test(observed_otus~CropCycle, data=Pro_metadata_or)\
+\
+\
+summary(aov(observed_otus~Replication+CropCycle*Crop*SoilSamplingStage, data=Pro_metadata_or))\
+summary(aov(shannon~Replication+CropCycle*Crop*SoilSamplingStage, data=Pro_metadata_or))\
+summary(aov(faith_pd~Replication+CropCycle*Crop*SoilSamplingStage, data=Pro_metadata_or))\
+\
+#Figure 1A\
+alpha_richness_bac_soil<-boxplot(observed_otus~SoilSamplingStage, data=Pro_metadata_or, ylab="Bacterial and archaeal richness", xlab=expression(bold("Soil")),cex.lab=1.25, cex.axis=1.25)\
+\
+#Figure S1A\
+alpha_shannon_bac_soil<-boxplot(shannon~SoilSamplingStage, data=Pro_metadata_or, ylab="Bacterial and archaeal diversity (shannon)", xlab=expression(bold("Soil")),cex.lab=1.25, cex.axis=1.25) #supplemental figure\
+\
+library(grDevices)\
+library(colorRamps)\
+\
+#Figure 5\
+#adding linear regression line in the figure\
+alpha_richness_bac_cropcycle<-Pro_metadata_or %>%  ggplot(aes(x=CropCycle, y=observed_otus, group=SoilSamplingStage, shape=SoilSamplingStage))+\
+  geom_point(aes(color=SoilSamplingStage), size=4)+\
+  geom_smooth(aes(color=SoilSamplingStage), size=2,method=lm, se=TRUE, fullrange=TRUE)+\
+  ylab("Bacterial and archaeal richness") + xlab("Plant Cycle") + theme_bw() +\
+  theme(text=element_text(size=22, face="bold"))+ \
+  scale_color_manual( values=c("forestgreen", "sienna")) +labs(color='Soil', shape= 'Soil')\
+\
+\
+\
+######Beta DIVERSITY###################\
+######Beta DIVERSITY###################\
+######Beta DIVERSITY###################\
+\
+#Calculate the weighted Unifrac(i.e diversity) distance and ordinate into an nMDS. We specify weighted with weighted-TRUE\
+wUF.ordu=ordinate(Pro_merged_OTMT, method="PCoA", distance="unifrac", weighted=TRUE)\
+\
+wUF.dist=UniFrac(Pro_merged_OTMT, weighted=TRUE, normalized=TRUE)\
+library(vegan)\
+\
+adonis2(wUF.dist~Replication+CropCycle*Crop*SoilSamplingStage, data=Pro_metadata, permutations=999)\
+\
+pairwise.adonis(as.matrix(wUF.dist), Pro_metadata$CropCycle)\
+pairwise.adonis(as.matrix(wUF.dist), Pro_metadata$Crop)\
+\
+#Figure 2A\
+PCoA_plants_bac<-plot_ordination(Pro_merged_OTMT, wUF.ordu, type="sites", color="SoilSamplingStage",shape="SoilSamplingStage",axes=1:2) + \
+  #scale_colour_manual(values=c("Lettuce"="green", "Kaichoy"="red", "Maize"="blue")) +\
+  theme_bw() +\
+  geom_point(size=4)+\
+  ggtitle("Bacteria and archaea") +\
+  stat_ellipse()+\
+  theme(text=element_text(size=16, face="bold")) + \
+  scale_color_manual(values=c("forestgreen", "sienna")) + labs(color='Soil',shape='Soil')\
+#theme(legend.position="top")+\
+# can add stat_ellipse()\
+\
+#SoilSamplingStage#######\
+#Planting#\
+Pro_metadata_Planting<- subset(Pro_metadata, SoilSamplingStage=="Fallow soil")\
+Pro_Meta_Planting<-sample_data(Pro_metadata_Planting) #Inserting in phyloseq\
+#merge Planting metadata to phyloseq object\
+Pro_merged_OTMSPT<-phyloseq(Pro_OTU,Pro_tax,Pro_Meta_Planting, Pro_phy_tree)\
+#Calculate the weighted Unifrac(i.e diversity) distance and ordinate into an nMDS. We specify weighted with weighted-TRUE\
+wUF_of_SP.ordu=ordinate(Pro_merged_OTMSPT, method="PCoA", distance="unifrac", weighted=TRUE)\
+\
+#Apha diversity\
+summary(aov(observed_otus~Replication+CropCycle*Crop, data=Pro_metadata_Planting))\
+summary(aov(shannon~Replication+CropCycle*Crop, data=Pro_metadata_Planting))\
+summary(aov(faith_pd~Replication+CropCycle*Crop, data=Pro_metadata_Planting))\
+\
+TukeyHSD(aov(observed_otus~Crop, data=Pro_metadata_Planting))\
+TukeyHSD(aov(shannon~Crop, data=Pro_metadata_Planting))\
+TukeyHSD(aov(faith_pd~Crop, data=Pro_metadata_Planting))\
+\
+#Figure 3A\
+alpha_richness_bac_fallow_crop<-boxplot(observed_otus~Crop, data=Pro_metadata_Planting, ylab="Bacterial and archaeal richness (Fallow)", xlab=" ",cex.lab=1.25, cex.axis=1.25)\
+\
+TukeyHSD(aov(observed_otus~CropCycle, data=Pro_metadata_Planting))\
+TukeyHSD(aov(shannon~CropCycle, data=Pro_metadata_Planting))\
+TukeyHSD(aov(faith_pd~CropCycle, data=Pro_metadata_Planting))\
+#Figure \
+boxplot(observed_otus~CropCycle, data=Pro_metadata_Planting,xlab="Crops", ylab="Bacterial and archaeal richness (Fallow)")\
+\
+#Beta diversity\
+##Statistical test## here first we use phyloseq to calculate distance and run PERMANOVA\
+wUF_of_SP.dist=UniFrac(Pro_merged_OTMSPT, weighted=TRUE, normalized=TRUE)\
+adonis2(wUF_of_SP.dist~Crop*CropCycle, data=Pro_metadata_Planting, permutations=999) #significant effect\
+##Pairwise comaparison#\
+pairwise.adonis(as.matrix(wUF_of_SP.dist), Pro_metadata_Planting$CropCycle)\
+\
+\
+#by crop cycle \
+PCoA_Bac_planting_cropcycle<-plot_ordination(Pro_merged_OTMSPT, wUF_of_SP.ordu, type="sites", color="CropCycle", shape='CropCycle', axes=1:2) + \
+  #scale_colour_manual(values=c("Lettuce"="green", "Kaichoy"="red", "Maize"="blue")) +\
+  theme_bw() +\
+  geom_point(size=4)+\
+  ggtitle("Bacteria and archaea (fallow)")+\
+  stat_ellipse()+\
+  theme(text=element_text(size=14, face="bold")) + \
+  scale_color_manual( values=c("sienna1", "sienna3", "sienna")) +labs(color='Plant cycle', shape='Plant cycle')\
+\
+#by crop species \
+plot_ordination(Pro_merged_OTMSPT, wUF_of_SP.ordu, type="sites", color="Crop", axes=1:2) + \
+  #scale_colour_manual(values=c("Lettuce"="green", "Kaichoy"="red", "Maize"="blue")) +\
+  theme_bw() +\
+  geom_point(size=4)+\
+  ggtitle("Bacteria and archaea (fallow)")+\
+  stat_ellipse()+\
+  theme(text=element_text(size=14, face="bold")) + scale_color_brewer(palette = "Dark2") +\
+  labs(color="Plant", shape="Plant")\
+\
+\
+#Harvesting#\
+Pro_metadata_Harvesting<- subset(Pro_metadata, SoilSamplingStage=="Cultivated soil")\
+Pro_Meta_Harvesting<-sample_data(Pro_metadata_Harvesting) #Inserting in phyloseq\
+#merge Harvesting metadata to phyloseq object\
+Pro_merged_OTMSHT<-phyloseq(Pro_OTU,Pro_tax,Pro_Meta_Harvesting, Pro_phy_tree)\
+\
+#Apha diversity\
+summary(aov(observed_otus~Replication+CropCycle*Crop, data=Pro_metadata_Harvesting))\
+summary(aov(shannon~Replication+CropCycle*Crop, data=Pro_metadata_Harvesting))\
+summary(aov(faith_pd~Replication+CropCycle*Crop, data=Pro_metadata_Harvesting))\
+par(mfrow=c(2,2))\
+TukeyHSD(aov(observed_otus~Crop, data=Pro_metadata_Harvesting))\
+TukeyHSD(aov(shannon~Crop, data=Pro_metadata_Harvesting))\
+\
+#Figure 3B\
+alpha_richness_bac_cultivated_crop<-boxplot(observed_otus~Crop, data=Pro_metadata_Harvesting, ylab="Bacterial and archaeal richness (Cultivated)", xlab=" ",cex.lab=1.25, cex.axis=1.25)\
+\
+TukeyHSD(aov(observed_otus~CropCycle, data=Pro_metadata_Harvesting))\
+TukeyHSD(aov(shannon~CropCycle, data=Pro_metadata_Harvesting))\
+TukeyHSD(aov(faith_pd~CropCycle, data=Pro_metadata_Harvesting))\
+boxplot(observed_otus~CropCycle, data=Pro_metadata_Harvesting,xlab="Crops", ylab="Bacterial and archaeal richness (Pre-harvesting")\
+\
+#Beta diversity\
+#Calculate the weighted Unifrac(i.e diversity) distance and ordinate into an nMDS. We SHecify weighted with weighted-TRUE\
+wUF_of_SH.ordu=ordinate(Pro_merged_OTMSHT, method="PCoA", distance="unifrac", weighted=TRUE)\
+\
+##Statistical test## here first we use phyloseq to calculate distance and run PERMANOVA\
+wUF_of_SH.dist=UniFrac(Pro_merged_OTMSHT, weighted=TRUE, normalized=TRUE)\
+adonis2(wUF_of_SH.dist~Crop*CropCycle, data=Pro_metadata_Harvesting, permutations=999) # effect of crop cycle\
+\
+##Pairwise comaparison#\
+pairwise.adonis(as.matrix(wUF_of_SH.dist), Pro_metadata_Harvesting$Crop)\
+pairwise.adonis(as.matrix(wUF_of_SH.dist), Pro_metadata_Harvesting$CropCycle)\
+\
+\
+#for crop cycle #Figure 6C\
+PCoA_Bac_harvesting_cropcycle<-plot_ordination(Pro_merged_OTMSHT, wUF_of_SH.ordu, type="sites", color="CropCycle",shape="CropCycle", axes=1:2) + \
+  #scale_colour_manual(values=c("First"="green", "Second"="red", "Third"="blue")) +\
+  theme_bw() +\
+  geom_point(size=4)+\
+  ggtitle("Bacteria and archaea (cultivated)") +\
+  stat_ellipse()+\
+  theme(text=element_text(size=14, face="bold")) + scale_color_manual( values=c("lawngreen", "springgreen3", "darkgreen")) + labs(color='Plant cycle', shape='Plant cycle')\
+#scale_color_brewer(palette = "Dark2") +labs(color="Plant Cycle", shape="Plant")\
+\
+\
+#for crop species #Figure 4A\
+PCoA_Bac_harvesting_crop<-plot_ordination(Pro_merged_OTMSHT, wUF_of_SH.ordu, type="sites", color  ="Crop", shape="Crop", axes=1:2) + \
+  #scale_colour_manual(values=c("First"="green", "Second"="red", "Third"="blue")) +\
+  theme_bw() +\
+  geom_point(size=4)+\
+  ggtitle("Bacteria and archaea (cultivated)") +\
+  stat_ellipse()+\
+  theme(text=element_text(size=14, face="bold")) + scale_color_brewer(palette = "Dark2") +labs(color='Plant', shape='Plant')\
+#scale_color_manual( values=c("lawngreen", "springgreen3", "darkgreen")) \
+#++ labs(color="Plant", shape="Plant")\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\b\fs28 \cf0 #For fungal data
+\fs24 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f1\b0 \cf0 library(vegan) #distance calculation by using Bray curtis and other\
+library(phyloseq) \
+library(ape) #required for tree calculatios to be used with phyloseq\
+library(dplyr)\
+library(ggplot2) #graph\
+library(tidyr) \
+library(phyloseq)\
+library(agricolae)\
+library(permute)\
+library(lattice)\
+library(tidyverse)\
+library (vegan)\
+\
+install.packages('devtools')\
+library(devtools)\
+install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis")\
+library(pairwiseAdonis)\
+library(cluster)\
+\
+Fun_OTU_table<-read.csv("/Volumes/GoogleDrive/Shared drives/Crop soil microbiome/microbial-data/demux_ITS_notruncate/diversity/lettuce_corn_kaichoy/qiimetoR/ITS-feature-table-LKM.csv", sep=',',header=TRUE, row.names=1, check.names=FALSE)\
+Fun_OTU_table<-as.matrix(Fun_OTU_table)\
+Fun_tax<-read.csv("/Volumes/GoogleDrive/Shared drives/Crop soil microbiome/microbial-data/demux_ITS_notruncate/diversity/lettuce_corn_kaichoy/qiimetoR/taxonomy_fungi.csv", sep=',', row.names=1)\
+Fun_tax<- as.matrix(Fun_tax)\
+head(Fun_tax)\
+Fun_metadata<-read.csv("/Volumes/GoogleDrive/Shared drives/Crop soil microbiome/microbial-data/demux_ITS_notruncate/diversity/lettuce_corn_kaichoy/qiimetoR/metadata-ITS-LKM.csv", row.names=1, header=TRUE, sep = ',')\
+Fun_phy_tree<-read_tree("//Volumes/GoogleDrive/Shared drives/Crop soil microbiome/microbial-data/demux_ITS_notruncate/diversity/lettuce_corn_kaichoy/qiimetoR/ITS-rooted-tree.nwk")\
+Fun_metadata$SoilSample=factor(Fun_metadata$SoilSamplingStage, c("Fallow", "Cultivated"))\
+Fun_metadata$SoilSample=factor(Fun_metadata$SoilSample, c("Fallow soil", "Cultivated soil"))\
+##Let's import all as phyloseq object###\
+\
+Fun_OTU<-otu_table(Fun_OTU_table, taxa_are_rows=TRUE)\
+Fun_tax<-tax_table(Fun_tax)\
+Fun_Meta<-sample_data(Fun_metadata)\
+\
+##Checking for consistent OTU names\
+taxa_names(Fun_tax)\
+taxa_names(Fun_OTU)\
+taxa_names(Fun_phy_tree)\
+\
+###Finally merge four data##\
+Fun_merged_OTMT<-phyloseq(Fun_OTU,Fun_tax,Fun_Meta, Fun_phy_tree)\
+\
+######ALPHA DIVERSITY###################\
+######ALPHA DIVERSITY###################\
+######ALPHA DIVERSITY###################\
+#Normality test#\
+shapiro.test(Fun_metadata$observed_otus) #Pass the normality test and distribution is normal\
+shapiro.test(Fun_metadata$shannon) #Pass the normality test and distribution is normal\
+\
+summary(aov(observed_otus~Replication+CropCycle*Crop*SoilSamplingStage, data=Fun_metadata))\
+summary(aov(shannon~Replication+CropCycle*Crop*SoilSamplingStage, data=Fun_metadata))\
+\
+#Figure S1B\
+alpha_diversity_fun_soil<-boxplot(shannon~SoilSamplingStage, data=Fun_metadata, ylab="Fungal diversity (shannon)", xlab=expression(bold("Soil Samples")), cex.lab=1.25, cex.axis=1.25)\
+#Figure 1B\
+alpha_richness_fun_soil<-boxplot(observed_otus~SoilSamplingStage, data=Fun_metadata, ylab="Fungal richness", xlab=expression(bold("Soil")), cex.lab=1.25, cex.axis=1.25, ylim=c(20, 90))\
+\
+library(grDevices)\
+library(colorRamps)\
+#Figure 5B\
+alpha_richness_fun_cropcycle<-Fun_metadata %>%  ggplot(aes(x=CropCycle, y=observed_otus, group=SoilSamplingStage, shape=SoilSamplingStage))+\
+  geom_smooth(aes(color=SoilSamplingStage), size=2, method=lm, se=TRUE, fullrange=TRUE)+ geom_point(aes(color=SoilSamplingStage), size=4)+\
+  ylab("Fungal richness") + xlab("Plant Cycle") + theme_bw() +\
+  theme(text=element_text(size=22, face="bold"))+\
+  scale_color_manual( values=c("forestgreen", "sienna"))#+ labs(color='Soil')\
+\
+\
+######Beta DIVERSITY###################\
+######Beta DIVERSITY###################\
+######Beta DIVERSITY###################\
+#Work with otu table which was merged in phyloseq which makes easier to plot graphs\
+Fun_OTU.t<-t(Fun_OTU)\
+#apply clr standardization. suggested by #http://cc.oulu.fi/~jarioksa/opetus/metodi/vegantutor.pdf \
+stan.fun_OTU <- decostand(Fun_OTU.t, "hell")\
+#calculate the bray distance and do statistical test\
+Fun_BC_dist <-vegdist(stan.fun_OTU, method= "bray", binary=FALSE, upper=FALSE, na.rm=FALSE)\
+\
+adonis2(Fun_BC_dist~Replication+CropCycle*Crop*SoilSamplingStage, data=Fun_metadata, permutations=999, methods="bray") \
+###pairwise comparison\
+pairwise.adonis(as.matrix(Fun_BC_dist), Fun_metadata$Crop)\
+pairwise.adonis(as.matrix(Fun_BC_dist), Fun_metadata$CropCycle)\
+\
+\
+##plot the PCoA graph#\
+bray.ordu=ordinate(Fun_merged_OTMT, method="PCoA", distance="bray", weighted=TRUE)\
+\
+#Figure 2B\
+PCoa_plants_fun<-\
+  plot_ordination(Fun_merged_OTMT, bray.ordu, type="sites", color="SoilSamplingStage", shape='SoilSamplingStage', axes=1:2) + \
+  theme_bw() +\
+  geom_point(size=4)+\
+  stat_ellipse()+\
+  ggtitle("Fungi") +\
+  theme(text=element_text(size=16, face="bold")) +\
+  labs(color='Soil', shape='Soil') +scale_color_manual(values=c("forestgreen", "sienna"))\
+# + theme(legend.position="top")\
+\
+\
+##Planting###################\
+Fun_metadata_planting<- filter(Fun_metadata, SoilSamplingStage=="Fallow soil")\
+Fun_OTU_table_planting<-read.csv("/Volumes/GoogleDrive/Shared drives/Crop soil microbiome/microbial-data/demux_ITS_notruncate/diversity/lettuce_corn_kaichoy/qiimetoR/ITS-feature-table-LKM-Planting.csv", sep=',', header=TRUE, row.names=1, check.names=FALSE)\
+row.names(Fun_OTU_table_planting)\
+Fun_OTU_table_Planting<-as.matrix(Fun_OTU_table_planting)\
+Fun_tax_planting<-read.csv("/Volumes/GoogleDrive/Shared drives/Crop soil microbiome/microbial-data/demux_ITS_notruncate/diversity/lettuce_corn_kaichoy/qiimetoR/taxonomy_fungi_planting.csv", sep=',', row.names=1)\
+Fun_tax_planting<- as.matrix(Fun_tax_planting)\
+\
+Fun_OTU_Planting<-otu_table(Fun_OTU_table_Planting, taxa_are_rows=TRUE)\
+Fun_tax_Planting<-tax_table(Fun_tax_planting)\
+\
+Fun_Meta_Planting<-sample_data(Fun_metadata_planting)\
+\
+##Checking for consistent OTU names\
+taxa_names(Fun_tax_Planting)\
+taxa_names(Fun_OTU_Planting)\
+taxa_names(Fun_phy_tree)\
+\
+###Finally merge four data##\
+Fun_merged_OTMSPT<-phyloseq(Fun_OTU_Planting,Fun_tax_Planting,Fun_Meta_Planting, Fun_phy_tree)\
+###Apha diversity for planting#\
+#perform anova test\
+summary(aov(observed_otus~Replication+CropCycle*Crop, data=Fun_metadata_planting))\
+summary(aov(shannon~Replication+CropCycle*Crop, data=Fun_metadata_planting))\
+\
+TukeyHSD(aov(observed_otus~Crop, data=Fun_metadata_planting))\
+TukeyHSD(aov(shannon~Crop, data=Fun_metadata_planting))\
+\
+#Figure 3C\
+alpha_richness_fun_fallow_crop<-boxplot(observed_otus~Crop, data=Fun_metadata_planting,xlab=expression(bold("Plants")), ylab="Fungal richness (Fallow)",cex.lab=1.25, cex.axis=1.25)\
+\
+TukeyHSD(aov(observed_otus~CropCycle, data=Fun_metadata_planting))\
+TukeyHSD(aov(shannon~CropCycle, data=Fun_metadata_planting))\
+boxplot(observed_otus~CropCycle, data=Fun_metadata_planting,xlab="Crops", ylab="Fungal OTU richness (Fallow)")\
+\
+#Beta diversity\
+Fun_OTU_Planting.t<-t(Fun_OTU_Planting)\
+#apply clr standardization. suggested by #http://cc.oulu.fi/~jarioksa/opetus/metodi/vegantutor.pdf \
+stan.fun_OTU_Planting <- decostand(Fun_OTU_Planting.t, "hell")\
+#calculate the bray distance and do statistical test\
+Fun_BC_dist_Planting <-vegdist(stan.fun_OTU_Planting, method= "bray", binary=FALSE, upper=FALSE, na.rm=FALSE)\
+library(vegan)\
+adonis2(Fun_BC_dist_Planting~CropCycle*Crop, data=Fun_metadata_planting, permutations=999, methods="bray") \
+\
+###pairwise comparison\
+pairwise.adonis(as.matrix(Fun_BC_dist_Planting), Fun_metadata_planting$Crop)\
+pairwise.adonis(as.matrix(Fun_BC_dist_Planting), Fun_metadata_planting$CropCycle)\
+\
+pairwise.perm.manova(Fun_BC_dist_Planting, Fun_metadata_planting$CropCycle, test="Wilks", nperm=999, p.method = "fdr") #difference\
+pairwise.perm.manova(Fun_BC_dist_Planting, Fun_metadata_planting$Crop, test="Wilks", nperm=999, p.method = "fdr") #difference\
+\
+\
+\
+##plot the PCoA graph#\
+bray.ordu_planting=ordinate(Fun_merged_OTMSPT, method="PCoA", distance="bray", weighted=TRUE)\
+\
+#for crop cycle #Figure 6B\
+PCoA_Fun_planting_cropcycle<-plot_ordination(Fun_merged_OTMSPT, bray.ordu_planting, type="sites", color="CropCycle", shape="CropCycle", axes=1:2) + \
+  #scale_colour_manual(values=c("Lettuce"="green", "Kaichoy"="red", "Maize"="blue")) +\
+  theme_bw() +\
+  geom_point(size=4)+\
+  ggtitle("Fungi (fallow)") +\
+  stat_ellipse()+\
+  theme(text=element_text(size=14, face="bold")) + \
+  scale_color_manual( values=c("sienna1", "sienna3", "sienna")) +labs(color='Plant cycle', shape='Plant cycle')\
+#+ scale_color_brewer(palette = "Dark2") + labs(color="Plant Cycle", shape="Plant")\
+\
+\
+#########Harvesting########\
+Fun_metadata_harvesting<- filter(Fun_metadata, SoilSamplingStage=="Cultivated soil")\
+Fun_OTU_table_harvesting<-read.csv("/Volumes/GoogleDrive/Shared drives/Crop soil microbiome/microbial-data/demux_ITS_notruncate/diversity/lettuce_corn_kaichoy/qiimetoR/ITS-feature-table-LKM-Harvesting.csv", sep=',',header=TRUE, row.names=1, check.names=FALSE)\
+Fun_OTU_table_Harvesting<-as.matrix(Fun_OTU_table_harvesting)\
+Fun_tax_harvesting<-read.csv("/Volumes/GoogleDrive/Shared drives/Crop soil microbiome/microbial-data/demux_ITS_notruncate/diversity/lettuce_corn_kaichoy/qiimetoR/taxonomy_fungi_harvesting.csv", sep=',', row.names=1)\
+Fun_tax_harvesting<- as.matrix(Fun_tax_harvesting)\
+\
+Fun_OTU_Harvesting<-otu_table(Fun_OTU_table_Harvesting, taxa_are_rows=TRUE)\
+Fun_tax_Harvesting<-tax_table(Fun_tax_harvesting)\
+Fun_Meta_Harvesting<-sample_data(Fun_metadata_harvesting)\
+\
+##Checking for consistent OTU names\
+taxa_names(Fun_tax_Harvesting)\
+taxa_names(Fun_OTU_Harvesting)\
+taxa_names(Fun_phy_tree)\
+\
+###Finally merge four data##\
+Fun_merged_OTMSHT<-phyloseq(Fun_OTU_Harvesting,Fun_tax_Harvesting,Fun_Meta_Harvesting, Fun_phy_tree)\
+\
+####Apha diversity for harvesting#\
+#perform anova test\
+summary(aov(observed_otus~Replication+CropCycle*Crop, data=Fun_metadata_harvesting))\
+summary(aov(shannon~Replication+CropCycle*Crop, data=Fun_metadata_harvesting))\
+\
+TukeyHSD(aov(observed_otus~Crop, data=Fun_metadata_harvesting))\
+TukeyHSD(aov(shannon~Crop, data=Fun_metadata_harvesting))\
+\
+#Figure 3D\
+alpha_richness_fun_cultivated_crop<-boxplot(observed_otus~Crop, data=Fun_metadata_harvesting,xlab=expression(bold("Plants")), ylab="Fungal richness (Cultivated)",cex.lab=1.25, cex.axis=1.25)\
+\
+TukeyHSD(aov(observed_otus~CropCycle, data=Fun_metadata_harvesting))\
+TukeyHSD(aov(shannon~CropCycle, data=Fun_metadata_harvesting))\
+boxplot(observed_otus~CropCycle, data=Fun_metadata_harvesting,xlab="Plants", ylab="Fungal richness (Cultivated)")\
+\
+#Work with otu table which was merged in phyloseq which makes easier to plot graphs\
+Fun_OTU_Harvesting.t<-t(Fun_OTU_Harvesting)\
+#apply clr standardization. suggested by #http://cc.oulu.fi/~jarioksa/opetus/metodi/vegantutor.pdf \
+stan.fun_OTU_Harvesting <- decostand(Fun_OTU_Harvesting.t, "hell")\
+#calculate the bray distance and do statistical test\
+Fun_BC_dist_Harvesting <-vegdist(stan.fun_OTU_Harvesting, method= "bray", binary=FALSE, upper=FALSE, na.rm=FALSE)\
+\
+adonis2(Fun_BC_dist_Harvesting~CropCycle*Crop, data=Fun_metadata_harvesting, permutations=999, methods="bray") \
+library(vegan)\
+###pairwise comparison\
+pairwise.adonis(as.matrix(Fun_BC_dist_Harvesting), Fun_metadata_harvesting$Crop)\
+pairwise.adonis(as.matrix(Fun_BC_dist_Harvesting), Fun_metadata_harvesting$CropCycle)\
+\
+\
+##plot the PCoA graph#\
+bray.ordu_harvesting=ordinate(Fun_merged_OTMSHT, method="PCoA", distance="bray", weighted=TRUE)\
+my_theme<-  theme_bw() +\
+  theme(text=element_text(size=15, face="bold")) +theme(legend.position="left")\
+\
+#for plant cycle\
+#Figure 6D\
+PCoA_Fun_harvesting_cropcycle<-plot_ordination(Fun_merged_OTMSHT, bray.ordu_harvesting, type="sites", color="CropCycle", shape="CropCycle", axes=1:2) + \
+  #scale_colour_manual(values=c("Lettuce"="green", "Kaichoy"="red", "Maize"="blue")) +\
+  theme_bw() +\
+  geom_point(size=4)+\
+  ggtitle("Fungi (cultivated)") + \
+  stat_ellipse()+\
+  theme(text=element_text(size=14, face="bold")) + \
+  scale_color_manual( values=c("lawngreen", "springgreen3", "darkgreen")) +labs(color='Plant cycle', shape='Plant cycle')\
+#scale_color_brewer(palette = "Dark2") + labs(color="Plant Cycle", shape="Plant")\
+#for plant\
+\
+#Figure 4B\
+PCoA_Fun_harvesting_crop<-plot_ordination(Fun_merged_OTMSHT, bray.ordu_harvesting, type="sites", color="Crop", shape="Crop", axes=1:2) + \
+  #scale_colour_manual(values=c("Lettuce"="green", "Kaichoy"="red", "Maize"="blue")) +\
+  theme_bw() +\
+  geom_point(size=4)+\
+  ggtitle("Fungi (cultivated)") + \
+  stat_ellipse()+\
+  theme(text=element_text(size=14, face="bold")) + scale_color_brewer(palette = "Dark2") +\
+  labs(color="Plant", shape='Plant')\
+\
+library(grid)\
+library(gridExtra)\
+par(mfrow = c(1, 2))\
+\
+grid.arrange (alpha_richness_bac_cropcycle,alpha_richness_fun_cropcycle, ncol=2, nrow=1)\
+grid.arrange(PCoA_Bac_planting_cropcycle, PCoA_Fun_planting_cropcycle, PCoA_Bac_harvesting_cropcycle, PCoA_Fun_harvesting_cropcycle, ncol=2, nrow=2)\
+grid.arrange(PCoA_plants_bac,PCoa_plants_fun, ncol=2, nrow=1)\
+grid.arrange(PCoA_Bac_harvesting_crop, PCoA_Fun_harvesting_crop, ncol=2)\
+\
+\
+\
+\
+\
+\pard\pardeftab720\ri0\partightenfactor0
+\cf0 \
+}
