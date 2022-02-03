@@ -1,0 +1,73 @@
+#SampleID,S.N.,Gene,BarcodeSequence,LinkerPrimerSequence,CropCycle,SoilSamplingStage,SoilSamplingTimepoint,Replication,Crop,PrimerSet,PrimerNumber,observed_otus,shannon
+Fun.1.H.A.K,19,Fungi,GTGACTCTAGTAGCGT,NA,First,Cultivated soil,Two,A,Mustard cabbage,3,211,61,4.486605374
+Fun.1.H.A.L,17,Fungi,TATAGTAGAGTAGCGT,NA,First,Cultivated soil,Two,A,Lettuce,3,209,58,4.427115686
+Fun.1.H.A.M,18,Fungi,TAGTAACGAGTAGCGT,NA,First,Cultivated soil,Two,A,Maize,3,210,59,3.558793352
+Fun.1.H.B.K,21,Fungi,CGAGACGTAGTAGCGT,NA,First,Cultivated soil,Two,B,Mustard cabbage,3,213,71,4.577073602
+Fun.1.H.B.L,24,Fungi,TATCTGACAGTAGCGT,NA,First,Cultivated soil,Two,B,Lettuce,3,216,54,3.572911742
+Fun.1.H.B.M,22,Fungi,CTCGTCGAAGTAGCGT,NA,First,Cultivated soil,Two,B,Maize,3,214,74,4.464414133
+Fun.1.H.C.K,28,Fungi,GTCTCGTACAGTGAGT,NA,First,Cultivated soil,Two,C,Mustard cabbage,3,220,64,4.320211347
+Fun.1.H.C.L,25,Fungi,TATAGTAGCAGTGAGT,NA,First,Cultivated soil,Two,C,Lettuce,3,217,62,4.500672019
+Fun.1.H.C.M,26,Fungi,TAGTAACGCAGTGAGT,NA,First,Cultivated soil,Two,C,Maize,3,218,71,3.650953662
+Fun.1.H.D.K,29,Fungi,CGAGACGTCAGTGAGT,NA,First,Cultivated soil,Two,D,Mustard cabbage,3,221,67,5.021796751
+Fun.1.H.D.L,31,Fungi,ACACGATCCAGTGAGT,NA,First,Cultivated soil,Two,D,Lettuce,3,223,44,4.22844661
+Fun.1.H.D.M,32,Fungi,TATCTGACCAGTGAGT,NA,First,Cultivated soil,Two,D,Maize,3,224,68,3.880690906
+Fun.1.P.A.K,3,Fungi,GTGACTCTAACTCTCG,NA,First,Fallow soil,One,A,Mustard cabbage,3,195,38,3.287066426
+Fun.1.P.A.L,1,Fungi,TATAGTAGAACTCTCG,NA,First,Fallow soil,One,A,Lettuce,3,193,58,3.926630913
+Fun.1.P.A.M,2,Fungi,TAGTAACGAACTCTCG,NA,First,Fallow soil,One,A,Maize,3,194,42,3.017901516
+Fun.1.P.B.K,5,Fungi,CGAGACGTAACTCTCG,NA,First,Fallow soil,One,B,Mustard cabbage,3,197,60,4.220805294
+Fun.1.P.B.L,8,Fungi,TATCTGACAACTCTCG,NA,First,Fallow soil,One,B,Lettuce,3,200,44,3.861936855
+Fun.1.P.B.M,6,Fungi,CTCGTCGAAACTCTCG,NA,First,Fallow soil,One,B,Maize,3,198,41,3.229085487
+Fun.1.P.C.K,12,Fungi,GTCTCGTAACTATGTC,NA,First,Fallow soil,One,C,Mustard cabbage,3,204,65,4.657405809
+Fun.1.P.C.L,9,Fungi,TATAGTAGACTATGTC,NA,First,Fallow soil,One,C,Lettuce,3,201,53,3.931407015
+Fun.1.P.C.M,10,Fungi,TAGTAACGACTATGTC,NA,First,Fallow soil,One,C,Maize,3,202,54,3.227135689
+Fun.1.P.D.K,13,Fungi,CGAGACGTACTATGTC,NA,First,Fallow soil,One,D,Mustard cabbage,3,205,48,4.013760547
+Fun.1.P.D.L,15,Fungi,ACACGATCACTATGTC,NA,First,Fallow soil,One,D,Lettuce,3,207,36,2.047398871
+Fun.1.P.D.M,16,Fungi,TATCTGACACTATGTC,NA,First,Fallow soil,One,D,Maize,3,208,69,4.406915145
+Fun.2.H.A.K,51,Fungi,GTGACTCTGGAGACTA,NA,Second,Cultivated soil,Four,A,Mustard cabbage,3,243,51,3.118036446
+Fun.2.H.A.L,49,Fungi,TATAGTAGGGAGACTA,NA,Second,Cultivated soil,Four,A,Lettuce,3,241,44,3.429168891
+Fun.2.H.A.M,50,Fungi,TAGTAACGGGAGACTA,NA,Second,Cultivated soil,Four,A,Maize,3,242,69,5.196640197
+Fun.2.H.B.K,53,Fungi,CGAGACGTGGAGACTA,NA,Second,Cultivated soil,Four,B,Mustard cabbage,3,245,56,3.882198416
+Fun.2.H.B.L,56,Fungi,TATCTGACGGAGACTA,NA,Second,Cultivated soil,Four,B,Lettuce,3,248,67,4.198929057
+Fun.2.H.B.M,54,Fungi,CTCGTCGAGGAGACTA,NA,Second,Cultivated soil,Four,B,Maize,3,246,77,4.890839789
+Fun.2.H.C.K,60,Fungi,GTCTCGTAGTCGCTCG,NA,Second,Cultivated soil,Four,C,Mustard cabbage,3,252,62,4.818149109
+Fun.2.H.C.L,57,Fungi,TATAGTAGGTCGCTCG,NA,Second,Cultivated soil,Four,C,Lettuce,3,249,76,4.891225104
+Fun.2.H.C.M,58,Fungi,TAGTAACGGTCGCTCG,NA,Second,Cultivated soil,Four,C,Maize,3,250,60,4.113737243
+Fun.2.H.D.K,61,Fungi,CGAGACGTGTCGCTCG,NA,Second,Cultivated soil,Four,D,Mustard cabbage,3,253,60,4.911271639
+Fun.2.H.D.L,63,Fungi,ACACGATCGTCGCTCG,NA,Second,Cultivated soil,Four,D,Lettuce,3,255,54,4.508528151
+Fun.2.H.D.M,64,Fungi,TATCTGACGTCGCTCG,NA,Second,Cultivated soil,Four,D,Maize,3,256,48,3.775075373
+Fun.2.P.A.K,35,Fungi,GTGACTCTCGTACTCA,NA,Second,Fallow soil,Three,A,Mustard cabbage,3,227,59,4.777004238
+Fun.2.P.A.L,33,Fungi,TATAGTAGCGTACTCA,NA,Second,Fallow soil,Three,A,Lettuce,3,225,56,3.822857433
+Fun.2.P.A.M,34,Fungi,TAGTAACGCGTACTCA,NA,Second,Fallow soil,Three,A,Maize,3,226,54,4.652440853
+Fun.2.P.B.K,37,Fungi,CGAGACGTCGTACTCA,NA,Second,Fallow soil,Three,B,Mustard cabbage,3,229,54,4.423902894
+Fun.2.P.B.L,40,Fungi,TATCTGACCGTACTCA,NA,Second,Fallow soil,Three,B,Lettuce,3,232,62,4.578339052
+Fun.2.P.B.M,38,Fungi,CTCGTCGACGTACTCA,NA,Second,Fallow soil,Three,B,Maize,3,230,62,4.870932555
+Fun.2.P.C.K,44,Fungi,GTCTCGTACTACGCAG,NA,Second,Fallow soil,Three,C,Mustard cabbage,3,236,41,4.089168405
+Fun.2.P.C.L,41,Fungi,TATAGTAGCTACGCAG,NA,Second,Fallow soil,Three,C,Lettuce,3,233,57,3.919529206
+Fun.2.P.C.M,42,Fungi,TAGTAACGCTACGCAG,NA,Second,Fallow soil,Three,C,Maize,3,234,70,4.744320237
+Fun.2.P.D.K,45,Fungi,CGAGACGTCTACGCAG,NA,Second,Fallow soil,Three,D,Mustard cabbage,3,237,43,4.581796479
+Fun.2.P.D.L,47,Fungi,ACACGATCCTACGCAG,NA,Second,Fallow soil,Three,D,Lettuce,3,239,57,4.551876371
+Fun.2.P.D.M,48,Fungi,TATCTGACCTACGCAG,NA,Second,Fallow soil,Three,D,Maize,3,240,56,4.448629497
+Fun.3.H.A.K,83,Fungi,ACTCGCTAAACTCTCG,NA,Third,Cultivated soil,Six,A,Mustard cabbage,1,3,63,4.736073424
+Fun.3.H.A.L,81,Fungi,CGTACGATAACTCTCG,NA,Third,Cultivated soil,Six,A,Lettuce,1,1,47,3.709048804
+Fun.3.H.A.M,82,Fungi,CAGATAGTAACTCTCG,NA,Third,Cultivated soil,Six,A,Maize,1,2,59,4.107046947
+Fun.3.H.B.K,85,Fungi,CTCGATGAAACTCTCG,NA,Third,Cultivated soil,Six,B,Mustard cabbage,1,5,55,4.363772919
+Fun.3.H.B.L,88,Fungi,ACGGTGTCAACTCTCG,NA,Third,Cultivated soil,Six,B,Lettuce,1,8,66,4.399530699
+Fun.3.H.B.M,86,Fungi,CACTCACGAACTCTCG,NA,Third,Cultivated soil,Six,B,Maize,1,6,46,3.913716014
+Fun.3.H.C.K,92,Fungi,ACACGCAGACTATGTC,NA,Third,Cultivated soil,Six,C,Mustard cabbage,1,12,45,3.62694921
+Fun.3.H.C.L,89,Fungi,CGTACGATACTATGTC,NA,Third,Cultivated soil,Six,C,Lettuce,1,9,54,3.829546585
+Fun.3.H.C.M,90,Fungi,CAGATAGTACTATGTC,NA,Third,Cultivated soil,Six,C,Maize,1,10,50,4.587468172
+Fun.3.H.D.K,93,Fungi,CTCGATGAACTATGTC,NA,Third,Cultivated soil,Six,D,Mustard cabbage,1,13,48,4.446791103
+Fun.3.H.D.L,95,Fungi,AGATATCCACTATGTC,NA,Third,Cultivated soil,Six,D,Lettuce,1,15,76,5.072997404
+Fun.3.H.D.M,96,Fungi,ACGGTGTCACTATGTC,NA,Third,Cultivated soil,Six,D,Maize,1,16,46,3.639818182
+Fun.3.P.A.K,67,Fungi,GTGACTCTGTCGTAGT,NA,Third,Fallow soil,Five,A,Mustard cabbage,3,259,49,4.338068826
+Fun.3.P.A.L,65,Fungi,TATAGTAGGTCGTAGT,NA,Third,Fallow soil,Five,A,Lettuce,3,257,36,3.873971789
+Fun.3.P.A.M,66,Fungi,TAGTAACGGTCGTAGT,NA,Third,Fallow soil,Five,A,Maize,3,258,58,4.125049426
+Fun.3.P.B.K,69,Fungi,CGAGACGTGTCGTAGT,NA,Third,Fallow soil,Five,B,Mustard cabbage,3,261,22,2.678180453
+Fun.3.P.B.L,72,Fungi,TATCTGACGTCGTAGT,NA,Third,Fallow soil,Five,B,Lettuce,3,264,46,3.632039576
+Fun.3.P.B.M,70,Fungi,CTCGTCGAGTCGTAGT,NA,Third,Fallow soil,Five,B,Maize,3,262,45,3.224437383
+Fun.3.P.C.K,76,Fungi,GTCTCGTATAGCAGAC,NA,Third,Fallow soil,Five,C,Mustard cabbage,3,268,38,3.049344152
+Fun.3.P.C.L,73,Fungi,TATAGTAGTAGCAGAC,NA,Third,Fallow soil,Five,C,Lettuce,3,265,44,3.272409689
+Fun.3.P.C.M,74,Fungi,TAGTAACGTAGCAGAC,NA,Third,Fallow soil,Five,C,Maize,3,266,69,4.393908956
+Fun.3.P.D.K,77,Fungi,CGAGACGTTAGCAGAC,NA,Third,Fallow soil,Five,D,Mustard cabbage,3,269,27,3.337923823
+Fun.3.P.D.L,79,Fungi,ACACGATCTAGCAGAC,NA,Third,Fallow soil,Five,D,Lettuce,3,271,41,2.997016317
+Fun.3.P.D.M,80,Fungi,TATCTGACTAGCAGAC,NA,Third,Fallow soil,Five,D,Maize,3,272,35,2.886102261
