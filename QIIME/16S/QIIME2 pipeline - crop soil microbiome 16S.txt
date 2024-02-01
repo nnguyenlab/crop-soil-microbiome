@@ -1,0 +1,812 @@
+NGUYEN LAB AMPLICON ANALYSIS PIPELINE WITH QIIME2
+Version 2.4, updated July 2020
+Analysis started Jan. 4, 2023
+
+#################################################################################
+PREPARE WORKING SPACE
+#################################################################################
+conda activate qiime2-2022.8
+cd /Volumes/GoogleDrive/Shared\ drives/Crop\ soil\ microbiome/Data/CSM/qiime2_data/Nhu_analyses/16S
+
+#################################################################################
+IMPORT DEMULTIPLEXED DATA INTO QIIME2
+#################################################################################
+cd /Volumes/GoogleDrive/Shared\ drives/Crop\ soil\ microbiome/Data/CSM/qiime2_data/Ishwora_analyses/16S/exported-demux-16S
+
+qiime tools import \
+  --type 'SampleData[PairedEndSequencesWithQuality]' \
+  --input-path MANIFEST.csv \
+  --input-format PairedEndFastqManifestPhred33 \
+  --output-path /Volumes/GoogleDrive/Shared\ drives/Crop\ soil\ microbiome/Data/CSM/qiime2_data/Nhu_analyses/16S/imported-paired-end-seqs.qza
+
+#CREATE a summary of demultiplexed data
+cd /Volumes/GoogleDrive/Shared\ drives/Crop\ soil\ microbiome/Data/CSM/qiime2_data/Nhu_analyses/16S
+
+qiime demux summarize \
+  --i-data imported-paired-end-seqs.qza \
+  --o-visualization demux.qzv
+
+#VIEW the summary file and determine the quality of the sequences
+qiime tools view demux.qzv
+
+
+#################################################################################
+SEQUENCE QUALITY FILTER & DENOISE
+#################################################################################
+#FILTER sequences (quality filtering) using DADA2
+#Quality control (can be done on either multiplexed or demultiplexed sequences)
+#Currently, DADA2 OTUs (CSVs) for conservative genes such as 16S and 18S are robust enough to be considered as "good" OTUs.
+#For less conservative genes such as ITS, clustering is still necessary and highly recommended.
+#--p-n-reads-learn default [1M seqs = 250Mb]; this is ~10% of the demultiplexed data. Adjust this value to correspond to your data. If your data has < 10M seqs, use the default.
+#--p-n-threads 0 = use all available cores; with 8 cores & 64GB of memory, a single run took about 12 hours.
+
+qiime dada2 denoise-paired \
+  --i-demultiplexed-seqs demux-16S.qza \
+  --p-trim-left-f 0 \
+  --p-trunc-len-f 272 \
+  --p-trim-left-r 0 \
+  --p-trunc-len-r 217 \
+  --o-representative-sequences rep-seqs.qza \
+  --o-table table.qza \
+  --o-denoising-stats denoising-stats.qza \
+  --p-n-threads 0 \
+  --p-n-reads-learn 1000000
+
+#TABULATE the denoising statistics
+qiime metadata tabulate \
+  --m-input-file denoising-stats.qza \
+  --o-visualization denoising-stats.qzv
+
+#VIEW denoising stats; if there is a huge drop in your sequences after pairing, reconsider sequence trimming criteria.
+qiime tools view denoising-stats.qzv
+
+#SUMMARIZE and view summaries of the FeatureTable (OTU table) and FeatureData (representative seqs)
+qiime feature-table summarize \
+  --i-table table.qza \
+  --o-visualization table.qzv \
+  --m-sample-metadata-file metadata-16S.txt
+
+#VIEW feature table summaries
+qiime tools view table.qzv
+
+#################################################################################
+ASSIGN TAXONOMY
+#################################################################################
+#Simple method using sklearn
+#For 16S assign taxonomy to rep-seqs.qza; use the SILVA 16S database, trimmed to the gene region of interest (V4, 515-806)
+qiime feature-classifier classify-sklearn \
+  --i-classifier /Volumes/GoogleDrive/Shared\ drives/Research/bioinformatics/classifier/silva-138-99-nb-weighted-classifier.qza \
+  --i-reads rep-seqs.qza \
+  --o-classification taxonomy.qza
+
+#Connect your OTU data to taxonomy and create bar plots
+qiime metadata tabulate \
+  --m-input-file taxonomy.qza \
+  --o-visualization taxonomy.qzv
+  
+qiime taxa barplot \
+  --i-table table.qza \
+  --i-taxonomy taxonomy.qza \
+  --m-metadata-file metadata-16S.txt \
+  --o-visualization taxa-bar-plots.qzv
+
+#################################################################################
+QUALITY CONTROL OF OTUS
+#################################################################################
+#FILTER table to remove Unassigned, mitochondria, and chloroplast sequences
+qiime taxa filter-table \
+  --i-table table.qza \
+  --i-taxonomy taxonomy.qza \
+  --p-exclude Unassigned,mitochondria,chloroplast,Eukaryota \
+  --o-filtered-table table-prok-only.qza
+  
+qiime feature-table summarize \
+  --i-table table-prok-only.qza \
+  --o-visualization table-prok-only.qzv \
+  --m-sample-metadata-file metadata-16S.txt
+  
+#CREATE another taxa barplot for data exploration
+qiime taxa barplot \
+  --i-table table-prok-only.qza \
+  --i-taxonomy taxonomy.qza \
+  --m-metadata-file metadata-16S.txt \
+  --o-visualization taxa-barplot-prok-only.qzv
+
+#################################################################################
+DEALING WITH PCR CONTROLS
+#################################################################################
+#OBSERVE the positive and negative controls from the exported table
+#Is there evidence for tag bleeding/switching? With our dual barcode system, this is not a common case.
+#Are there any negative control sequences that appear in abundance? If so, these need to be removed.
+#Use what you've learned to further filter the table
+
+#IMPORTANT: The first part of this workflow extracts taxonomy and append it to an existing OTU table. This is highly recommended.
+#EXPORT taxonomy artifact
+qiime tools export \
+  --input-path taxonomy.qza \
+  --output-path exported-taxonomy
+
+#COPY and re-name taxonomy file
+cp exported-taxonomy/taxonomy.tsv exported-taxonomy/biom-taxonomy.tsv
+
+#REPLACE the header of the table with QIIME style formatting
+#OTUID	taxonomy	confidence
+
+#EXPORT OTU table into BIOM format for further processing
+qiime tools export \
+  --input-path table-prok-only.qza \
+  --output-path exported-table
+
+#ADD metadata to the OTU table and convert it to tsv to view
+biom add-metadata \
+ -i exported-table/feature-table.biom \
+ -o exported-table/feature-table-with-taxonomy.biom \
+ --observation-metadata-fp exported-taxonomy/biom-taxonomy.tsv \
+ --sc-separated taxonomy
+
+#CONVERT biom to tsv for analyses elsewhere
+biom convert \
+  -i exported-table/feature-table-with-taxonomy.biom \
+  -o exported-table/feature-table-with-taxonomy.tsv \
+  --to-tsv \
+  --process-obs-metadata taxonomy \
+  --header-key taxonomy
+
+#This is where you can decide to remove other OTUs or samples that did not pass other filtering steps
+#Samples could be removed using the options within "qiime feature-table XXX" or manual through the spreadsheet and then converted back into biom for further processign in QIIME.
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#RESULTS
+#The negative controls had 1 sequence and appears to be a single "Bacteria" ASV in the dataset that is not found in any other samples. The run is clean.
+#The positive control bled into other samples with the TOTAL max frequency of 194. Since no other samples bled into the negative or positive, I removed only singletons, which aligns well with the negative controls.
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#CONVERT tsv (text) file back to biome format
+biom convert \
+  -i exported-table/feature-table-controls-removed.tsv \
+  -o exported-table/feature-table-controls-removed.biom \
+  --to-hdf5 \
+  --table-type="OTU table" \
+  --process-obs-metadata taxonomy
+
+#Import biom tables into qza
+qiime tools import \
+  --input-path exported-table/feature-table-controls-removed.biom \
+  --type 'FeatureTable[Frequency]' \
+  --input-format BIOMV210Format \
+  --output-path table-controls-removed.qza
+
+#Filter any OTUs with less than 1 sequences as the bleed rate.
+qiime feature-table filter-features \
+  --i-table table-controls-removed.qza \
+  --p-min-frequency 2 \
+  --o-filtered-table table-filtered.qzad
+
+qiime feature-table summarize \
+  --i-table table-filtered.qza \
+  --m-sample-metadata-file metadata-16S.txt \
+  --o-visualization table-filtered.qzv
+
+#Filter table for this project only. Removing the Sunn Hemp samples. LKM = Lettuce, Kaichoi, Maize
+qiime feature-table filter-samples \
+  --i-table table-filtered.qza \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --o-filtered-table table-LKM.qza
+
+qiime feature-table summarize \
+  --i-table table-LKM.qza \
+  --m-sample-metadata-file metadata-16S-LKM.txt \
+  --o-visualization table-LKM.qzv
+
+#################################################################################
+PREPARING FOR PHYLOGENETIC DIVERSITY ANALYSES
+#################################################################################
+#Filter your rep-seqs so that you'll have a dataset to work with that is reflective of the filters
+#Use the resulting filtered rep-seqs in downstream analyses (especially phylogenetic analyses)
+
+qiime feature-table filter-seqs \
+  --i-data rep-seqs.qza \
+  --i-table table-LKM.qza \
+  --o-filtered-data rep-seqs-LKM.qza
+
+qiime phylogeny align-to-tree-mafft-fasttree \
+  --i-sequences rep-seqs-LKM.qza \
+  --output-dir phylo
+
+#################################################################################
+COMMUNITY COMPARISONS WITHIN SAMPLES (ALPHA DIVERSITY)
+#################################################################################
+qiime tools view table-LKM.qzv
+
+qiime diversity alpha-rarefaction \
+  --i-table table-LKM.qza \
+  --i-phylogeny phylo/rooted_tree.qza \
+  --p-max-depth 5549 \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --o-visualization alpha-rarefaction-5549.qzv
+
+#Core metrics with phylogenetic measures (used for 16S & 18S)
+qiime diversity core-metrics-phylogenetic \
+  --i-phylogeny phylo/rooted_tree.qza \
+  --i-table table-LKM.qza \
+  --p-sampling-depth 5549 \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --output-dir core-metrics-results
+
+#Additional analysis with aitchison distance
+#Get aitchison distance (Euclidean-clr transformed) for LME
+qiime diversity beta \
+  --i-table core-metrics-results/rarefied_table.qza \
+  --p-metric aitchison \
+  --o-distance-matrix core-metrics-results/aitchison_distance_matrix.qza
+
+qiime diversity pcoa \
+  --i-distance-matrix core-metrics-results/aitchison_distance_matrix.qza \
+  --o-pcoa core-metrics-results/aitchison_pcoa_results.qza
+
+qiime emperor plot \
+--i-pcoa core-metrics-results/aitchison_pcoa_results.qza \
+--m-metadata-file metadata-16S-LKM.txt \
+--o-visualization core-metrics-results/aitchison_pcoa_emperor.qzv
+
+#################################################################################
+COMMUNITY COMPOSITION (beta diversity)
+#################################################################################
+qiime diversity beta-group-significance \
+  --i-distance-matrix core-metrics-results/aitchison_distance_matrix.qza \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --m-metadata-column Cycle \
+  --o-visualization core-metrics-results/aitchison-CropCycle-significance.qzv \
+  --p-pairwise
+
+qiime tools view core-metrics-results/aitchison-CropCycle-significance.qzv
+
+
+#################################################################################
+ANCOM DIFFERENTIAL ABUNDANCE
+#################################################################################
+#Similar to "Indicator Species Analysis", this method will only detect those that are clearly represented in one group of samples and not the rest.
+#It isn't able to take into account high abundance of an OTU in one group of samples vs. low abundance in another.
+#Therefore non-significance shouldn't be interpreted too heavily.
+
+#REMOVE lower abundance OTUs to reduce noise and increase computational efficiency
+# --p-min-samples = minimum number of sample that an OTU has to be found in to be kept
+# --p-min-frequency = The minimum number of sequences that must be present in an OTU to be kept
+
+mkdir ANCOM
+
+qiime feature-table filter-features \
+  --i-table table-LKM.qza \
+  --p-min-frequency 10 \
+  --p-min-samples 4 \
+  --o-filtered-table ANCOM/table-LKM-ancom.qza
+
+#ADD speudo-counts to replace the zeros that affect statistics
+qiime composition add-pseudocount \
+  --i-table ANCOM/table-LKM-ancom.qza \
+  --o-composition-table ANCOM/table-LKM-ancom-pseudocount.qza
+
+#CALCULATE differential abundance among the different categories of samples
+qiime composition ancom \
+  --i-table ANCOM/table-LKM-ancom-pseudocount.qza \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --m-metadata-column CropCycle \
+  --o-visualization ANCOM/ancom-LKM-CropCycle.qzv
+
+qiime tools view ANCOM/ancom-LKM-CropCycle.qzv
+
+qiime composition ancom \
+  --i-table ANCOM/table-LKM-ancom-pseudocount.qza \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --m-metadata-column SoilSampling \
+  --o-visualization ANCOM/ancom-LKM-SoilSampling.qzv
+
+qiime tools view ANCOM/ancom-LKM-SoilSampling.qzv
+
+#################################################################################
+LONGITUDINAL ANALYSES
+#################################################################################
+mkdir longitudinal
+
+----------------------
+VOILATILITY ANALYSIS
+----------------------
+#"Assess how volatile a dependent variable is over a continuous, independent variable (e.g., time) in one or more groups"
+#Multiple metadata files (alpha and beta diversity artifacts) can be used as inputs
+qiime longitudinal volatility \
+  --m-metadata-file core-metrics-results/aitchison_pcoa_results.qza \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --p-default-metric 'Axis 1' \
+  --p-default-group-column Crop \
+  --p-state-column Cycle \
+  --p-individual-id-column StudyID2 \
+  --o-visualization longitudinal/voilatility-aitchison.qzv
+-------
+RESULTS: This works. Tested with weighted and unweighted unifrac, and aitchison.
+------- 
+
+-----------------------------
+FEATURE VOILATILITY ANALYSIS
+-----------------------------
+#This method uses machine learning to predict features that are important to a sample state.
+#Any numeric measurement of the sample state (time, length) can be used
+#Only "important" features are plotted. These are the features that are most predictive within the model, based on their weights or model coefficient. 
+#First examine to see how accurate the model is. Then examine the feature voilatility.
+qiime longitudinal feature-volatility \
+  --i-table table-LKM.qza \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --p-state-column Cycle \
+  --p-individual-id-column StudyID2 \
+  --p-n-estimators 100 \
+  --p-random-state 17 \
+  --output-dir longitudinal/volatility-features2
+
+#Use "metadata tabulate" to merge the feature importance data with taxonomy assignments to determine the taxonomic classification of this ASV (and other important features)
+qiime metadata tabulate \
+  --m-input-file longitudinal/volatility-features2/feature_importance.qza \
+  --m-input-file taxonomy.qza \
+  --o-visualization longitudinal/volatility-features2/feature_importance_with_taxonomy.qzv
+
+-----------------------------
+LME ANALYSIS ACROSS TIME
+-----------------------------
+#Perform LME analysis for repeated measures
+#state-column should be a fixed effect (eg. time or other fixed categorical variables)
+#group-column should be a random variable(s) taken randomly from a population (e.g. weight, length etc...)
+qiime longitudinal linear-mixed-effects \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --m-metadata-file core-metrics-results/shannon_vector.qza \
+  --p-metric shannon_entropy \
+  --p-group-columns Soil,Crop \
+  --p-state-column Cycle \
+  --p-individual-id-column StudyID \
+  --o-visualization longitudinal/linear-mixed-effects-shannon.qzv
+
+#Perform LME analysis for repeated measures (using observed features)
+qiime longitudinal linear-mixed-effects \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --m-metadata-file core-metrics-results/observed_features_vector.qza \
+  --p-metric observed_features \
+  --p-group-columns Soil,Crop \
+  --p-state-column Cycle \
+  --p-individual-id-column StudyID \
+  --o-visualization longitudinal/linear-mixed-effects-richness.qzv
+-------
+RESULTS: Both analyses showed the same pattern:
+Cultivated soil originally had a higher measure, then converged to the same level as uncultivated.
+Cultivated soil vs uncultivated soil and Cycle were the only significant results.
+There is a significant interaction effect between these two measures.
+-------
+
+-----------------------------
+PAIRWISE ANALYSIS (has limited use for this manuscript)
+-----------------------------
+#Pairwise comparisons (input files may be richness, Shannon, or principal coordinates)
+#state-column should be a fixed effect (eg. time or other fixed categorical variables)
+#group-column should be a random variable(s) taken randomly from a population (e.g. weight, length etc...)
+
+#Shannon (cultivated vs. uncultivated)
+qiime longitudinal pairwise-differences \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --m-metadata-file core-metrics-results/shannon_vector.qza \
+  --p-metric shannon_entropy \
+  --p-group-column Soil \
+  --p-state-column Cycle \
+  --p-state-1 1 \
+  --p-state-2 3 \
+  --p-individual-id-column StudyID \
+  --p-replicate-handling random \
+  --o-visualization longitudinal/pairwise-differences-shannon-Soil.qzv
+
+#Richness (cultivated vs. uncultivated)
+qiime longitudinal pairwise-differences \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --m-metadata-file core-metrics-results/observed_features_vector.qza \
+  --p-metric observed_features \
+  --p-group-column Soil \
+  --p-state-column Cycle \
+  --p-state-1 1 \
+  --p-state-2 3 \
+  --p-individual-id-column StudyID \
+  --p-replicate-handling random \
+  --o-visualization longitudinal/pairwise-differences-richness-Soil.qzv
+
+#Aitchison (Cultivated vs. uncultivated)
+qiime longitudinal pairwise-differences \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --m-metadata-file core-metrics-results/observed_features_vector.qza \
+  --p-metric observed_features \
+  --p-group-column Soil \
+  --p-state-column Cycle \
+  --p-state-1 1 \
+  --p-state-2 3 \
+  --p-individual-id-column StudyID \
+  --p-replicate-handling random \
+  --o-visualization longitudinal/pairwise-differences-richness-Soil.qzv
+
+-------
+RESULTS: shannon was significant but observed was highly significant between cultivated and uncultivated soils
+-------
+
+
+qiime longitudinal pairwise-differences \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --m-metadata-file core-metrics-results/shannon_vector.qza \
+  --p-metric shannon_entropy \
+  --p-group-column CropSoil \
+  --p-state-column Cycle \
+  --p-state-1 1 \
+  --p-state-2 3 \
+  --p-individual-id-column StudyID \
+  --p-replicate-handling random \
+  --o-visualization longitudinal/pairwise-differences-shannon-CropSoil.qzv
+
+qiime longitudinal pairwise-differences \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --m-metadata-file core-metrics-results/observed_features_vector.qza \
+  --p-metric observed_features \
+  --p-group-column CropSoil \
+  --p-state-column Cycle \
+  --p-state-1 1 \
+  --p-state-2 3 \
+  --p-individual-id-column StudyID \
+  --p-replicate-handling random \
+  --o-visualization longitudinal/pairwise-differences-richness-CropSoil.qzv
+-------
+RESULTS: There was no significance after p-correction
+-------
+
+#UniFrac Distance
+qiime longitudinal pairwise-distances \
+  --i-distance-matrix core-metrics-results/unweighted_unifrac_distance_matrix.qza \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --p-group-column Soil \
+  --p-state-column Cycle \
+  --p-state-1 1 \
+  --p-state-2 3 \
+  --p-individual-id-column StudyID \
+  --p-replicate-handling random \
+  --o-visualization longitudinal/pairwise-distances-uwUnifrac.qzv
+
+qiime longitudinal pairwise-distances \
+  --i-distance-matrix core-metrics-results/weighted_unifrac_distance_matrix.qza \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --p-group-column Soil \
+  --p-state-column Cycle \
+  --p-state-1 1 \
+  --p-state-2 3 \
+  --p-individual-id-column StudyID \
+  --p-replicate-handling random \
+  --o-visualization longitudinal/pairwise-distances-wUnifrac.qzv
+
+qiime longitudinal pairwise-distances \
+  --i-distance-matrix core-metrics-results/aitchison_distance_matrix.qza \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --p-group-column Soil \
+  --p-state-column Cycle \
+  --p-state-1 1 \
+  --p-state-2 3 \
+  --p-individual-id-column StudyID \
+  --p-replicate-handling random \
+  --o-visualization longitudinal/pairwise-distances-aitchison-Soil.qzv
+-------
+RESULTS:
+UniFrac distances were not significant
+Aitchison distances were significant (p=0.03)
+------- 
+
+qiime longitudinal pairwise-distances \
+  --i-distance-matrix core-metrics-results/aitchison_distance_matrix.qza \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --p-group-column CropSoil \
+  --p-state-column Cycle \
+  --p-state-1 1 \
+  --p-state-2 3 \
+  --p-individual-id-column StudyID \
+  --p-replicate-handling random \
+  --o-visualization longitudinal/pairwise-distances-aitchison-CropSoil.qzv
+-------
+RESULTS:
+No significance in pairwise comparison
+------- 
+
+--------------------------------------------
+RATE OF CHANGE OVER TIME FOR ALL SAMPLES
+Can't seem to get this to work yet
+--------------------------------------------
+#First calculate the differences (either shannon or distance matrix)
+#Shannon is used here
+qiime longitudinal first-differences \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --m-metadata-file core-metrics-results/shannon_vector.qza \
+  --p-state-column Cycle \
+  --p-metric shannon_entropy \
+  --p-individual-id-column StudyID \
+  --p-replicate-handling random \
+  --o-first-differences longitudinal/first-differences-shannon.qza
+
+#Then can be viewed with the voilatility analyzer or analyzed with the LME model
+qiime longitudinal linear-mixed-effects \
+  --m-metadata-file longitudinal/first-differences-shannon.qza \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --p-metric Difference \
+  --p-state-column Cycle \
+  --p-group-columns Soil,Crop \
+  --p-individual-id-column StudyID \
+  --o-visualization longitudinal/first-differences-shannon.qzv
+
+
+#A distance matrix is used here
+qiime longitudinal first-distances \
+  --i-distance-matrix core-metrics-results/aitchison_distance_matrix.qza \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --p-state-column Cycle \
+  --p-individual-id-column StudyID \
+  --p-replicate-handling random \
+  --o-first-distances longitudinal/first-distances-aitchison.qza
+
+#Then can be viewed with the voilatility analyzer or analyzed with the LME model
+qiime longitudinal linear-mixed-effects \
+  --m-metadata-file longitudinal/first-distances-aitchison.qza \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --p-metric Distance \
+  --p-state-column Cycle \
+  --p-group-columns Soil,Crop \
+  --p-individual-id-column StudyID \
+  --o-visualization longitudinal/first-distances-aitchison.qzv
+
+
+--------------------------------------------
+RATE OF CHANGE FROM BASELINE
+Can't seem to get this to work yet
+--------------------------------------------
+#This is similar to the first distances analysis above, except that it calls for a baseline of comparison
+#Rate of change from baseline can be very powerful to tease apart noisy data associated with different time points
+#Following the rate of change analysis above, this distance matrix can be used as input into the voilatility analysis or LME model
+qiime longitudinal first-distances \
+  --i-distance-matrix core-metrics-results/aitchison_distance_matrix.qza \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --p-state-column Cycle \
+  --p-individual-id-column StudyID \
+  --p-replicate-handling random \
+  --p-baseline 1 \
+  --o-first-distances longitudinal/first-distances-baseline-aitchison.qza
+  
+#Then can be viewed with the voilatility analyzer or analyzed with the LME model
+qiime longitudinal linear-mixed-effects \
+  --m-metadata-file longitudinal/first-distances-baseline-aitchison.qza \
+  --m-metadata-file metadata-16S-LKM.txt \
+  --p-metric Distance \
+  --p-state-column Cycle \
+  --p-group-columns Soil,Crop \
+  --p-individual-id-column StudyID \
+  --o-visualization longitudinal/first-distances-aitchison.qzv
+
+
+#This method can also be used to track longitudinal changes of shared features across a single sample type (e.g. host species).
+#This can show how unique features are lost/gained over the course of an experiment.
+#Input into the matrix using Jaccard distance (features that are not shared)
+qiime longitudinal first-distances \
+  --i-distance-matrix Jaccard_distance_matrix.qza \
+  --m-metadata-file ecam-sample-metadata.tsv \
+  --p-state-column month \
+  --p-individual-id-column studyid \
+  --p-replicate-handling random \
+  --p-baseline 0 \
+  --o-first-distances first-distances-baseline-0.qza
+
+
+#################################################################################
+ADD TAXONOMY TO OTU TABLE FOR FURTHER ANALYSES OUTSIDE OF QIIME
+#################################################################################
+#EXPORT taxonomy artifact
+qiime tools export \
+  --input-path taxonomy.qza \
+  --output-path exported-taxonomy
+
+#COPY and re-name taxonomy file
+cp exported-taxonomy/taxonomy.tsv exported-taxonomy/biom-taxonomy.tsv
+
+#REPLACE the header of the table with QIIME style formatting
+#OTUID	taxonomy	confidence
+
+
+#Export unrarefied OTU table
+qiime tools export \
+  --input-path table-LKM.qza \
+  --output-path exported-table
+
+#ADD metadata to the OTU table and convert it to tsv to view
+biom add-metadata \
+ -i exported-table/feature-table.biom \
+ -o exported-table/table-LKM-with-taxonomy.biom \
+ --observation-metadata-fp exported-taxonomy/biom-taxonomy.tsv \
+ --sc-separated taxonomy
+
+#CONVERT biom to tsv to be able to view and sort table
+biom convert \
+  -i exported-table/table-LKM-with-taxonomy.biom \
+  -o exported-table/table-LKM-with-taxonomy.tsv \
+  --to-tsv \
+  --process-obs-metadata taxonomy \
+  --header-key taxonomy
+
+
+#Export rarefied OTU table
+qiime tools export \
+  --input-path core-metrics-results/rarefied_table.qza \
+  --output-path exported-table
+
+#ADD metadata to the OTU table and convert it to tsv to view
+biom add-metadata \
+ -i exported-table/feature-table.biom \
+ -o exported-table/table-rarefied-with-taxonomy.biom \
+ --observation-metadata-fp exported-taxonomy/biom-taxonomy.tsv \
+ --sc-separated taxonomy
+
+#CONVERT biom to tsv for analyses elsewhere
+biom convert \
+  -i exported-table/table-rarefied-with-taxonomy.biom \
+  -o exported-table/table-rarefied-with-taxonomy.tsv \
+  --to-tsv \
+  --process-obs-metadata taxonomy \
+  --header-key taxonomy
+
+
+#################################################################################
+EXPORT FILES FROM QZA FOR FURTHER ANALYSES
+#################################################################################
+#EXPORT sequences
+#FILTER out sequences from rep-seqs to match the dataset
+qiime feature-table filter-seqs \
+  --i-data rep-seqs.qza \
+  --i-table table-LKM.qza \
+  --o-filtered-data rep-seqs-LKM.qza
+
+qiime tools export \
+  --input-path rep-seqs-LKM.qza \
+  --output-path exported-seqs
+  
+mv exported-seqs/dna-sequences.fasta exported-seqs/rep-seqs-LKM.fasta
+
+++++++++++++++++++++++++++++++++++++++++
+#EXPORT observed OTU counts
+qiime tools export \
+  --input-path core-metrics-results/observed_features_vector.qza \
+  --output-path exported-data
+
+#RENAME the file
+mv exported-data/alpha-diversity.tsv exported-data/observed-otus.tsv
+
+++++++++++++++++++++++++++++++++++++++++
+#EXPORT Shannon values
+qiime tools export \
+  --input-path core-metrics-results/shannon_vector.qza \
+  --output-path exported-data
+
+#RENAME the file
+mv exported-data/alpha-diversity.tsv exported-data/shannon-diversity.tsv
+
+++++++++++++++++++++++++++++++++++++++++
+#EXPORT PD values
+qiime tools export \
+  --input-path core-metrics-results/faith_pd_vector.qza \
+  --output-path exported-data
+
+#RENAME the file
+mv exported-data/alpha-diversity.tsv exported-data/faith-PD.tsv
+
+++++++++++++++++++++++++++++++++++++++++
+#EXPORT Distance matrix
+qiime tools export \
+  --input-path core-metrics-results/aitchison_distance_matrix.qza \
+  --output-path exported-data
+
+#RENAME the file
+mv exported-data/distance-matrix.tsv exported-data/aitchison-distance-matrix.tsv
+
+++++++++++++++++++++++++++++++++++++++++
+#EXPORT PCOA results
+qiime tools export \
+  --input-path core-metrics-results/aitchison_pcoa_results.qza \
+  --output-path exported-data
+
+#RENAME the file
+mv exported-data/ordination.txt exported-data/pcoa_aitchison.tsv
+
+++++++++++++++++++++++++++++++++++++++++
+#EXPORT tree
+qiime tools export \
+  --input-path phylo/rooted_tree.qza \
+  --output-path exported-data
+
+#RENAME the file
+mv exported-data/tree.nwk exported-data/rooted-tree.nwk
+
+
+++++++++++++++++++++++++++++++++++++++++
+#EXPORT other qza files
+qiime tools export \
+  --input-path longitudinal/first-distances-aitchison.qza \
+  --output-path exported-data
+
+#RENAME the file
+mv exported-data/FirstDifferences.tsv exported-data/first-distances-aitchison.tsv
+
+++++++++++++++++++++++++++++++++++++++++
+#EXPORT other qza files
+qiime tools export \
+  --input-path longitudinal/first-differences-shannon.qza \
+  --output-path exported-data
+
+#RENAME the file
+mv exported-data/FirstDifferences.tsv exported-data/first-differences-shannon.tsv
+
+++++++++++++++++++++++++++++++++++++++++
+#EXPORT other qza files
+qiime tools export \
+  --input-path longitudinal/first-distances-baseline-aitchison.qza \
+  --output-path exported-data
+
+#RENAME the file
+mv exported-data/FirstDifferences.tsv exported-data/first-distances-baseline-aitchison.qzv
+
+
+
+
+*********************************************************************************
+***********************    SOME USEFUL QIIME COMMANDS    ************************
+*********************************************************************************
+
+#################################################################################
+EXTRACTING DATA FROM QIIME2 ARTIFACTS
+#################################################################################
+#EXPORT OTU table into BIOM format for processing elsewhere (optional)
+#This tool exports the main data contained in a qza and can be more useful
+qiime tools export \
+  --input-path table.qza \
+  --output-path exported-table
+
+qiime tools export \
+  --input-path core-metrics-results/shannon_vector.qza \
+  --output-path exported-metrics
+
+#EXTRACT the table from a qza file
+#This tool extracts all the data within a qza and is less useful
+mkdir extracted-table
+qiime tools extract \
+  --input-path table.qza \
+  --output-path extracted-table
+
+#EXTRACT demux data from a qza file
+mkdir extracted-demux
+qiime tools extract \
+  --input-path demux.qza \
+  --output-path extracted-demux
+  
+#################################################################################
+#RARIFYING AND COLLAPSING TABLES
+#################################################################################
+qiime feature-table rarefy \
+  --i-table filtered-table.qza \
+  --p-sampling-depth 2831 \
+  --o-rarefied-table rarefied-table.qza
+  
+#To collapse at different taxonomic levels, please take a look at taxa collapse, which will collapse 3 a table (rarefied or not) based on a specified taxonomic level via a provided taxonomy artifact:
+qiime taxa collapse \
+  --i-table rarefied-table.qza \
+  --i-taxonomy taxonomy.qza \
+  --p-level 3 \
+  --o-collapsed-table my-rarefied-table-at-level-3.qza
+
+#################################################################################
+#SPLIT TABLE
+#################################################################################
+qiime feature-table filter-samples \
+–i-table INPUT_TABLE \
+–m-metadata-file METADATA_FILE \
+–p-where “[METADATA_HEADER]=‘SUBGROUP_WITHIN_MD_HEADER’” \
+–p-no-exclude-ids \
+–o-filtered-table OUTPUT_TABLE \
+
+
