@@ -1,0 +1,73 @@
+	SampleID	SampleNumber	PrimerNumber	BarcodeSequence	SoilSampling	Replication	CropCycle	CropCycle2	Crop	Soil	CropSoil	CycleSoil	Cycle	StudyID	StudyID2	observed_features	shannon_entropy	Axis1	Axis2	mean	sd
+1	Fun.1.H.A.K	19	211	GTGACTCTAGTAGCGT	Harvesting	A	C1	C1c	Mustard_cabbage	Cultivated	Kaichoy_cultivated	C1_cultivated	1	1	5	217	4.99936992	-3.25254971	-0.880140399	4.921956545	0.463878947
+2	Fun.1.H.A.L	17	209	TATAGTAGAGTAGCGT	Harvesting	A	C1	C1c	Lettuce	Cultivated	Lettuce_cultivated	C1_cultivated	1	5	13	200	4.966294421	-3.356193074	0.323587473		
+3	Fun.1.H.A.M	18	210	TAGTAACGAGTAGCGT	Harvesting	A	C1	C1c	Maize	Cultivated	Maize_cultivated	C1_cultivated	1	9	21	210	4.795660437	-8.200015674	0.207777602		
+4	Fun.1.H.B.K	21	213	CGAGACGTAGTAGCGT	Harvesting	B	C1	C1c	Mustard_cabbage	Cultivated	Kaichoy_cultivated	C1_cultivated	1	2	6	233	5.625941113	-12.17695087	-7.401597817		
+5	Fun.1.H.B.L	24	216	TATCTGACAGTAGCGT	Harvesting	B	C1	C1c	Lettuce	Cultivated	Lettuce_cultivated	C1_cultivated	1	6	14	175	4.15370246	-0.476055109	0.427217687		
+6	Fun.1.H.B.M	22	214	CTCGTCGAAGTAGCGT	Harvesting	B	C1	C1c	Maize	Cultivated	Maize_cultivated	C1_cultivated	1	10	22	207	5.551093123	-7.196127907	-7.83209262		
+7	Fun.1.H.C.K	28	220	GTCTCGTACAGTGAGT	Harvesting	C	C1	C1c	Mustard_cabbage	Cultivated	Kaichoy_cultivated	C1_cultivated	1	3	7	190	4.325331557	-1.470786897	-1.887094597		
+8	Fun.1.H.C.L	25	217	TATAGTAGCAGTGAGT	Harvesting	C	C1	C1c	Lettuce	Cultivated	Lettuce_cultivated	C1_cultivated	1	7	15	166	4.561286513	-4.265950377	-1.668467019		
+9	Fun.1.H.C.M	26	218	TAGTAACGCAGTGAGT	Harvesting	C	C1	C1c	Maize	Cultivated	Maize_cultivated	C1_cultivated	1	11	23	215	5.444259574	-9.769176731	-4.585522235		
+10	Fun.1.H.D.K	29	221	CGAGACGTCAGTGAGT	Harvesting	D	C1	C1c	Mustard_cabbage	Cultivated	Kaichoy_cultivated	C1_cultivated	1	4	8	186	4.760706681	-3.304293251	-0.681748168		
+11	Fun.1.H.D.L	31	223	ACACGATCCAGTGAGT	Harvesting	D	C1	C1c	Lettuce	Cultivated	Lettuce_cultivated	C1_cultivated	1	8	16	135	5.134850062	-6.570006108	-1.391635912		
+12	Fun.1.H.D.M	32	224	TATCTGACCAGTGAGT	Harvesting	D	C1	C1c	Maize	Cultivated	Maize_cultivated	C1_cultivated	1	12	24	208	4.744982677	-6.623002023	-0.089358235		
+13	Fun.1.P.A.K	3	195	GTGACTCTAACTCTCG	Planting	A	C1	C1uc	Mustard_cabbage	Uncultivated	Kaichoy_uncultivated	C1_uncultivated	1	1	1	187	4.541447013	-4.944120485	8.037950477	4.869830219	0.644573216
+14	Fun.1.P.A.L	1	193	TATAGTAGAACTCTCG	Planting	A	C1	C1uc	Lettuce	Uncultivated	Lettuce_uncultivated	C1_uncultivated	1	5	9	229	5.236413238	-12.45830243	6.096870683		
+15	Fun.1.P.A.M	2	194	TAGTAACGAACTCTCG	Planting	A	C1	C1uc	Maize	Uncultivated	Maize_uncultivated	C1_uncultivated	1	9	17	193	4.411307891	-9.330218229	7.693064383		
+16	Fun.1.P.B.K	5	197	CGAGACGTAACTCTCG	Planting	B	C1	C1uc	Mustard_cabbage	Uncultivated	Kaichoy_uncultivated	C1_uncultivated	1	2	2	231	5.293011456	-13.00462291	2.52237585		
+17	Fun.1.P.B.L	8	200	TATCTGACAACTCTCG	Planting	B	C1	C1uc	Lettuce	Uncultivated	Lettuce_uncultivated	C1_uncultivated	1	6	10	160	3.663473524	-2.670991418	6.912646599		
+18	Fun.1.P.B.M	6	198	CTCGTCGAAACTCTCG	Planting	B	C1	C1uc	Maize	Uncultivated	Maize_uncultivated	C1_uncultivated	1	10	18	199	5.139982339	-11.13155305	5.369532518		
+19	Fun.1.P.C.K	12	204	GTCTCGTAACTATGTC	Planting	C	C1	C1uc	Mustard_cabbage	Uncultivated	Kaichoy_uncultivated	C1_uncultivated	1	3	3	195	4.798426729	-7.51526027	6.394465007		
+20	Fun.1.P.C.L	9	201	TATAGTAGACTATGTC	Planting	C	C1	C1uc	Lettuce	Uncultivated	Lettuce_uncultivated	C1_uncultivated	1	7	11	222	5.571452851	-12.01740177	6.474338389		
+21	Fun.1.P.C.M	10	202	TAGTAACGACTATGTC	Planting	C	C1	C1uc	Maize	Uncultivated	Maize_uncultivated	C1_uncultivated	1	11	19	188	4.361848376	-5.760743124	3.57671212		
+22	Fun.1.P.D.K	13	205	CGAGACGTACTATGTC	Planting	D	C1	C1uc	Mustard_cabbage	Uncultivated	Kaichoy_uncultivated	C1_uncultivated	1	4	4	181	5.357521727	-10.23847787	6.218405691		
+23	Fun.1.P.D.L	15	207	ACACGATCACTATGTC	Planting	D	C1	C1uc	Lettuce	Uncultivated	Lettuce_uncultivated	C1_uncultivated	1	8	12	171	4.205452202	-3.078195152	7.899884273		
+24	Fun.1.P.D.M	16	208	TATCTGACACTATGTC	Planting	D	C1	C1uc	Maize	Uncultivated	Maize_uncultivated	C1_uncultivated	1	12	20	272	5.857625281	-14.08815588	1.268782184		
+25	Fun.2.H.A.K	51	243	GTGACTCTGGAGACTA	Harvesting	A	C2	C2c	Mustard_cabbage	Cultivated	Kaichoy_cultivated	C2_cultivated	2	1	5	185	4.134142524	0.860852352	-3.182447234	4.92195654	0.46387895
+26	Fun.2.H.A.L	49	241	TATAGTAGGGAGACTA	Harvesting	A	C2	C2c	Lettuce	Cultivated	Lettuce_cultivated	C2_cultivated	2	5	13	178	4.141623524	3.685923307	-3.343248067		
+27	Fun.2.H.A.M	50	242	TAGTAACGGGAGACTA	Harvesting	A	C2	C2c	Maize	Cultivated	Maize_cultivated	C2_cultivated	2	9	21	180	4.385431195	0.018377571	-5.7030633		
+28	Fun.2.H.B.K	53	245	CGAGACGTGGAGACTA	Harvesting	B	C2	C2c	Mustard_cabbage	Cultivated	Kaichoy_cultivated	C2_cultivated	2	2	6	167	4.209199651	2.504209301	-5.486960104		
+29	Fun.2.H.B.L	56	248	TATCTGACGGAGACTA	Harvesting	B	C2	C2c	Lettuce	Cultivated	Lettuce_cultivated	C2_cultivated	2	6	14	222	4.746048943	-0.413311609	-4.615942515		
+30	Fun.2.H.B.M	54	246	CTCGTCGAGGAGACTA	Harvesting	B	C2	C2c	Maize	Cultivated	Maize_cultivated	C2_cultivated	2	10	22	203	4.804090443	-0.359653538	-4.40466236		
+31	Fun.2.H.C.K	60	252	GTCTCGTAGTCGCTCG	Harvesting	C	C2	C2c	Mustard_cabbage	Cultivated	Kaichoy_cultivated	C2_cultivated	2	3	7	154	3.101282308	5.188361845	-1.168228425		
+32	Fun.2.H.C.L	57	249	TATAGTAGGTCGCTCG	Harvesting	C	C2	C2c	Lettuce	Cultivated	Lettuce_cultivated	C2_cultivated	2	7	15	192	4.832360739	1.948984854	-8.902005972		
+33	Fun.2.H.C.M	58	250	TAGTAACGGTCGCTCG	Harvesting	C	C2	C2c	Maize	Cultivated	Maize_cultivated	C2_cultivated	2	11	23	208	4.595262235	-0.146935163	-4.443230679		
+34	Fun.2.H.D.K	61	253	CGAGACGTGTCGCTCG	Harvesting	D	C2	C2c	Mustard_cabbage	Cultivated	Kaichoy_cultivated	C2_cultivated	2	4	8	135	4.041066061	6.226549823	0.092062324		
+35	Fun.2.H.D.L	63	255	ACACGATCGTCGCTCG	Harvesting	D	C2	C2c	Lettuce	Cultivated	Lettuce_cultivated	C2_cultivated	2	8	16	155	3.895396969	5.007164379	-1.905042305		
+36	Fun.2.H.D.M	64	256	TATCTGACGTCGCTCG	Harvesting	D	C2	C2c	Maize	Cultivated	Maize_cultivated	C2_cultivated	2	12	24	161	4.249529677	1.450062404	2.131304084		
+37	Fun.2.P.A.K	35	227	GTGACTCTCGTACTCA	Planting	A	C2	C2uc	Mustard_cabbage	Uncultivated	Kaichoy_uncultivated	C2_uncultivated	2	1	1	177	4.527638149	-0.971770589	0.975234612	4.92195654	0.46387895
+38	Fun.2.P.A.L	33	225	TATAGTAGCGTACTCA	Planting	A	C2	C2uc	Lettuce	Uncultivated	Lettuce_uncultivated	C2_uncultivated	2	5	9	184	4.862873624	-1.857586059	-0.048704499		
+39	Fun.2.P.A.M	34	226	TAGTAACGCGTACTCA	Planting	A	C2	C2uc	Maize	Uncultivated	Maize_uncultivated	C2_uncultivated	2	9	17	179	4.34601005	-3.029608414	0.922028998		
+40	Fun.2.P.B.K	37	229	CGAGACGTCGTACTCA	Planting	B	C2	C2uc	Mustard_cabbage	Uncultivated	Kaichoy_uncultivated	C2_uncultivated	2	2	2	190	4.910636509	-7.059488378	-1.724493753		
+41	Fun.2.P.B.L	40	232	TATCTGACCGTACTCA	Planting	B	C2	C2uc	Lettuce	Uncultivated	Lettuce_uncultivated	C2_uncultivated	2	6	10	184	4.379100826	-1.404587857	0.317564845		
+42	Fun.2.P.B.M	38	230	CTCGTCGACGTACTCA	Planting	B	C2	C2uc	Maize	Uncultivated	Maize_uncultivated	C2_uncultivated	2	10	18	170	5.009631371	-2.534219966	-4.022333489		
+43	Fun.2.P.C.K	44	236	GTCTCGTACTACGCAG	Planting	C	C2	C2uc	Mustard_cabbage	Uncultivated	Kaichoy_uncultivated	C2_uncultivated	2	3	3	133	3.311427562	2.593900777	1.173375138		
+44	Fun.2.P.C.L	41	233	TATAGTAGCTACGCAG	Planting	C	C2	C2uc	Lettuce	Uncultivated	Lettuce_uncultivated	C2_uncultivated	2	7	11	204	5.188972969	-4.701386845	-1.419187407		
+45	Fun.2.P.C.M	42	234	TAGTAACGCTACGCAG	Planting	C	C2	C2uc	Maize	Uncultivated	Maize_uncultivated	C2_uncultivated	2	11	19	205	5.20900348	-5.511631485	-3.643048396		
+46	Fun.2.P.D.K	45	237	CGAGACGTCTACGCAG	Planting	D	C2	C2uc	Mustard_cabbage	Uncultivated	Kaichoy_uncultivated	C2_uncultivated	2	4	4	151	5.229553422	-2.752336945	-0.526434278		
+47	Fun.2.P.D.L	47	239	ACACGATCCTACGCAG	Planting	D	C2	C2uc	Lettuce	Uncultivated	Lettuce_uncultivated	C2_uncultivated	2	8	12	178	5.012403851	-3.973746574	-3.320892517		
+48	Fun.2.P.D.M	48	240	TATCTGACCTACGCAG	Planting	D	C2	C2uc	Maize	Uncultivated	Maize_uncultivated	C2_uncultivated	2	12	20	190	4.611326531	-4.809681929	3.670718033		
+49	Fun.3.H.A.K	83	3	ACTCGCTAAACTCTCG	Harvesting	A	C3	C3c	Mustard_cabbage	Cultivated	Kaichoy_cultivated	C3_cultivated	3	1	5	171	4.079612161	7.427104811	-2.614762985	4.92195654	0.46387895
+50	Fun.3.H.A.L	81	1	CGTACGATAACTCTCG	Harvesting	A	C3	C3c	Lettuce	Cultivated	Lettuce_cultivated	C3_cultivated	3	5	13	151	4.073953483	7.190100622	-2.636822749		
+51	Fun.3.H.A.M	82	2	CAGATAGTAACTCTCG	Harvesting	A	C3	C3c	Maize	Cultivated	Maize_cultivated	C3_cultivated	3	9	21	165	4.042125106	2.717225479	-3.733692695		
+52	Fun.3.H.B.K	85	5	CTCGATGAAACTCTCG	Harvesting	B	C3	C3c	Mustard_cabbage	Cultivated	Kaichoy_cultivated	C3_cultivated	3	2	6	170	3.486742625	7.00793232	-4.132023472		
+53	Fun.3.H.B.L	88	8	ACGGTGTCAACTCTCG	Harvesting	B	C3	C3c	Lettuce	Cultivated	Lettuce_cultivated	C3_cultivated	3	6	14	164	3.850958198	4.516858382	-4.836375976		
+54	Fun.3.H.B.M	86	6	CACTCACGAACTCTCG	Harvesting	B	C3	C3c	Maize	Cultivated	Maize_cultivated	C3_cultivated	3	10	22	151	3.882666231	7.803686079	-0.497850646		
+55	Fun.3.H.C.K	92	12	ACACGCAGACTATGTC	Harvesting	C	C3	C3c	Mustard_cabbage	Cultivated	Kaichoy_cultivated	C3_cultivated	3	3	7	135	3.097115158	8.464599755	-1.958193237		
+56	Fun.3.H.C.L	89	9	CGTACGATACTATGTC	Harvesting	C	C3	C3c	Lettuce	Cultivated	Lettuce_cultivated	C3_cultivated	3	7	15	151	3.353156384	6.092797608	-2.856748476		
+57	Fun.3.H.C.M	90	10	CAGATAGTACTATGTC	Harvesting	C	C3	C3c	Maize	Cultivated	Maize_cultivated	C3_cultivated	3	11	23	166	3.945190683	4.479463405	-5.210052716		
+58	Fun.3.H.D.K	93	13	CTCGATGAACTATGTC	Harvesting	D	C3	C3c	Mustard_cabbage	Cultivated	Kaichoy_cultivated	C3_cultivated	3	4	8	122	3.504711786	8.87486104	-0.787205722		
+59	Fun.3.H.D.L	95	15	AGATATCCACTATGTC	Harvesting	D	C3	C3c	Lettuce	Cultivated	Lettuce_cultivated	C3_cultivated	3	8	16	166	4.93455865	-0.266009435	-14.7477807		
+60	Fun.3.H.D.M	96	16	ACGGTGTCACTATGTC	Harvesting	D	C3	C3c	Maize	Cultivated	Maize_cultivated	C3_cultivated	3	12	24	181	3.830506551	4.815860668	-2.267334792		
+61	Fun.3.P.A.K	67	259	GTGACTCTGTCGTAGT	Planting	A	C3	C3uc	Mustard_cabbage	Uncultivated	Kaichoy_uncultivated	C3_uncultivated	3	1	1	125	3.552765255	9.599703859	2.953959493	4.92195654	0.46387895
+62	Fun.3.P.A.L	65	257	TATAGTAGGTCGTAGT	Planting	A	C3	C3uc	Lettuce	Uncultivated	Lettuce_uncultivated	C3_uncultivated	3	5	9	77	2.520621779	11.16603554	5.069609633		
+63	Fun.3.P.A.M	66	258	TAGTAACGGTCGTAGT	Planting	A	C3	C3uc	Maize	Uncultivated	Maize_uncultivated	C3_uncultivated	3	9	17	136	3.434394238	6.861622474	3.210284964		
+64	Fun.3.P.B.K	69	261	CGAGACGTGTCGTAGT	Planting	B	C3	C3uc	Mustard_cabbage	Uncultivated	Kaichoy_uncultivated	C3_uncultivated	3	2	2	66	2.917073631	12.98923608	5.957366718		
+65	Fun.3.P.B.L	72	264	TATCTGACGTCGTAGT	Planting	B	C3	C3uc	Lettuce	Uncultivated	Lettuce_uncultivated	C3_uncultivated	3	6	10	147	3.405063869	8.389676503	2.818522635		
+66	Fun.3.P.B.M	70	262	CTCGTCGAGTCGTAGT	Planting	B	C3	C3uc	Maize	Uncultivated	Maize_uncultivated	C3_uncultivated	3	10	18	123	3.407287028	8.687356986	3.84507786		
+67	Fun.3.P.C.K	76	268	GTCTCGTATAGCAGAC	Planting	C	C3	C3uc	Mustard_cabbage	Uncultivated	Kaichoy_uncultivated	C3_uncultivated	3	3	3	94	3.415316636	11.79637543	5.611550951		
+68	Fun.3.P.C.L	73	265	TATAGTAGTAGCAGAC	Planting	C	C3	C3uc	Lettuce	Uncultivated	Lettuce_uncultivated	C3_uncultivated	3	7	11	96	2.678999625	10.72598607	5.138905155		
+69	Fun.3.P.C.M	74	266	TAGTAACGTAGCAGAC	Planting	C	C3	C3uc	Maize	Uncultivated	Maize_uncultivated	C3_uncultivated	3	11	19	162	4.10354368	3.133772881	2.92384021		
+70	Fun.3.P.D.K	77	269	CGAGACGTTAGCAGAC	Planting	D	C3	C3uc	Mustard_cabbage	Uncultivated	Kaichoy_uncultivated	C3_uncultivated	3	4	4	108	3.317026176	9.307242826	1.317973309		
+71	Fun.3.P.D.L	79	271	ACACGATCTAGCAGAC	Planting	D	C3	C3uc	Lettuce	Uncultivated	Lettuce_uncultivated	C3_uncultivated	3	8	12	99	3.177469509	10.13750955	6.99204034		
+72	Fun.3.P.D.M	80	272	TATCTGACTAGCAGAC	Planting	D	C3	C3uc	Maize	Uncultivated	Maize_uncultivated	C3_uncultivated	3	12	20	85	3.27198306	11.02171011	6.011396229		
